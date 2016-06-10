@@ -158,7 +158,14 @@ class Mustache_Context
     {
         $chunks = explode('.', $id);
         $first  = array_shift($chunks);
-        $value  = $this->findVariableInStack($first, $this->stack, $attrs);
+        $value  = '';
+
+        if (count($this->attrStack)) {
+            $value = $this->findVariableInStack($first, $this->attrStack, $attrs);
+        }
+        if (!$value) {
+            $value = $this->findVariableInStack($first, $this->stack, $attrs);
+        }
 
         foreach ($chunks as $chunk) {
             if ($value === '') {

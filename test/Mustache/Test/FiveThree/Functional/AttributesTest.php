@@ -79,6 +79,16 @@ class Mustache_Test_FiveThree_Functional_AttributesTest extends PHPUnit_Framewor
                     }
                 ),
                 'ok'
+            ),
+            array(
+                '{{# foo bar=bin }}{{ bar.ok }}{{/ foo }}',
+                array(
+                    'foo' => true,
+                    'bin' => [
+                        'ok' => 'ok'
+                    ]
+                ),
+                'ok'
             )
         );
     }
