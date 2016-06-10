@@ -158,6 +158,50 @@ class Mustache_Test_FiveThree_Functional_AttributesTest extends PHPUnit_Framewor
     }
 
     /**
+     * @dataProvider unescapedVarsWithAttributesData
+     */
+    public function testUnescapedVarsWithAttributes($tpl, $data, $expect)
+    {
+        $this->assertEquals($expect, $this->mustache->render($tpl, $data));
+    }
+
+    public function unescapedVarsWithAttributesData()
+    {
+        return array(
+            array(
+                '{{{ foo bar="foo" }}}',
+                array(
+                    'foo' => function ($attrs) {
+                        return $attrs['bar'];
+                    },
+                ),
+                'foo',
+            ),
+            array(
+                '{{{ foo bar="escaped" }}}',
+                array(
+                    'foo' => function ($attrs) {
+                        return $attrs['bar'];
+                    },
+                ),
+                'escaped',
+            ),
+            array(
+                '{{{ foo bar="1" }}}',
+                array(
+                    'foo' => 'thing',
+                ),
+                'thing',
+            ),
+            array(
+                '{{{ foo bar="1" }}}',
+                array(),
+                '',
+            ),
+        );
+    }
+
+    /**
      * @dataProvider varsWithAttributesAndFiltersData
      */
     public function testVarsWithAttributesAndFilters($tpl, $helpers, $data, $expect)
@@ -185,4 +229,39 @@ class Mustache_Test_FiveThree_Functional_AttributesTest extends PHPUnit_Framewor
             ),
         );
     }
+
+    /**
+     * @dataProvider classMethodsReceiveAttrsData
+     */
+    public function testClassMethodsReceiveAttrs($tpl, $data, $expect)
+    {
+        $this->assertEquals($expect, $this->mustache->render($tpl, $data));
+    }
+
+    public function classMethodsReceiveAttrsData()
+    {
+        return array(
+            array(
+                '{{ foo bar="foo" }}',
+                new Mustache_Test_FiveThree_Functional_AttributesTestStub,
+                'foo',
+            ),
+            array(
+                '{{ foo bar="some thing here" }}',
+                new Mustache_Test_FiveThree_Functional_AttributesTestStub,
+                'some thing here',
+            ),
+        );
+    }
+
+}
+
+class Mustache_Test_FiveThree_Functional_AttributesTestStub
+{
+
+    public function foo($attrs)
+    {
+        return $attrs['bar'];
+    }
+
 }

@@ -17,6 +17,7 @@ class Mustache_Context
     private $stack      = array();
     private $blockStack = array();
     private $attrStack  = array();
+    private $attrArgs   = null;
 
     /**
      * Mustache rendering Context constructor.
@@ -115,17 +116,17 @@ class Mustache_Context
      *
      * @return mixed Variable value, or '' if not found
      */
-    public function find($id)
+    public function find($id, $attrs=null)
     {
         if ($id !== '.' && count($this->attrStack)) {
             // Ensures that we don't override blocks that are looping over an array.
-            $val = $this->findVariableInStack($id, $this->attrStack);
+            $val = $this->findVariableInStack($id, $this->attrStack, $attrs);
             if ($val) {
                 return $val;
             }
         }
 
-        return $this->findVariableInStack($id, $this->stack);
+        return $this->findVariableInStack($id, $this->stack, $attrs);
     }
 
     /**
@@ -153,18 +154,18 @@ class Mustache_Context
      *
      * @return mixed Variable value, or '' if not found
      */
-    public function findDot($id)
+    public function findDot($id, $attrs=null)
     {
         $chunks = explode('.', $id);
         $first  = array_shift($chunks);
-        $value  = $this->findVariableInStack($first, $this->stack);
+        $value  = $this->findVariableInStack($first, $this->stack, $attrs);
 
         foreach ($chunks as $chunk) {
             if ($value === '') {
                 return $value;
             }
 
-            $value = $this->findVariableInStack($chunk, array($value));
+            $value = $this->findVariableInStack($chunk, array($value), $attrs);
         }
 
         return $value;
@@ -185,7 +186,7 @@ class Mustache_Context
      *
      * @return mixed Variable value, or '' if not found
      */
-    public function findAnchoredDot($id)
+    public function findAnchoredDot($id, $attrs=null)
     {
         $chunks = explode('.', $id);
         $first  = array_shift($chunks);
@@ -200,7 +201,7 @@ class Mustache_Context
                 return $value;
             }
 
-            $value = $this->findVariableInStack($chunk, array($value));
+            $value = $this->findVariableInStack($chunk, array($value), $attrs);
         }
 
         return $value;
@@ -234,7 +235,7 @@ class Mustache_Context
      *
      * @return mixed Variable value, or '' if not found
      */
-    private function findVariableInStack($id, array $stack)
+    private function findVariableInStack($id, array $stack, $attrs=null)
     {
         for ($i = count($stack) - 1; $i >= 0; $i--) {
             $frame = &$stack[$i];
@@ -245,6 +246,9 @@ class Mustache_Context
                         // Note that is_callable() *will not work here*
                         // See https://github.com/bobthecow/mustache.php/wiki/Magic-Methods
                         if (method_exists($frame, $id)) {
+                            if ($attrs) {
+                                return $frame->$id($attrs);
+                            }
                             return $frame->$id();
                         }
 

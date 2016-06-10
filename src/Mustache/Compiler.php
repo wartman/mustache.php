@@ -544,8 +544,13 @@ class Mustache_Compiler
     }
 
     const VARIABLE = '
-        $value = $this->resolveValue($context->%s(%s), $context%s);%s
+        %s
+        $value = $this->resolveValue($context->%s(%s), %s);%s
         $buffer .= %s%s;
+    ';
+
+    const VARIABLE_ATTRS = '
+        $attrs = %s;
     ';
 
     /**
@@ -568,9 +573,16 @@ class Mustache_Compiler
         $value   = $escape ? $this->getEscape() : '$value';
         $filters = $this->getFilters($filters, $level);
 
-        $args = count($attrs) ? ', ' . $this->passAttrs($attrs, $level + 1) : '';
+        if (count($attrs)) {
+            $attrArgs = sprintf($this->prepare(self::VARIABLE_ATTRS, $level), $this->passAttrs($attrs, $level + 1));
+            $id .= ', $attrs';
+            $args = '$context, $attrs';
+        } else {
+            $attrArgs = '';
+            $args = '$context';
+        }
 
-        return sprintf($this->prepare(self::VARIABLE, $level), $method, $id, $args, $filters, $this->flushIndent(), $value);
+        return sprintf($this->prepare(self::VARIABLE, $level), $attrArgs, $method, $id, $args, $filters, $this->flushIndent(), $value);
     }
 
     const FILTER = '
@@ -734,8 +746,8 @@ class Mustache_Compiler
     }
 
     const ATTR_SCOPE = '
-        $context->pushAttrContext([%s
-        ]);%s
+        $context->pushAttrContext(array(%s
+        ));%s
         $context->popAttrContext();
     ';
     const ATTR_BINDING = '"%s" => %s,';
@@ -782,7 +794,8 @@ class Mustache_Compiler
             );
         }
 
-        return sprintf('[%s]', $text);
+        return sprintf('array(%s
+        )', $text);
     }
 
     const ATTR_VALUE = '$this->resolveValue($context->%s("%s"), $context)';
