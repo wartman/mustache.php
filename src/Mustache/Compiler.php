@@ -389,13 +389,13 @@ class Mustache_Compiler
             $delimTag = var_export(sprintf('{{= %s %s =}}', $otag, $ctag), true);
             $helper = sprintf('$this->lambdaHelper->withDelimiters(%s)', $delimTag);
             if (count($attrs)) {
-                $helper = $helper . ', ' . $this->passAttrs($attrs, 3);
+                $helper = $helper . ', ' . $this->passAttrs($attrs, $level + 1);
             }
             $delims = ', ' . $delimTag;
         } else {
             $helper = '$this->lambdaHelper';
             if (count($attrs)) {
-                $helper .= ', ' . $this->passAttrs($attrs, 3);
+                $helper .= ', ' . $this->passAttrs($attrs, $level + 1);
             }
             $delims = '';
         }

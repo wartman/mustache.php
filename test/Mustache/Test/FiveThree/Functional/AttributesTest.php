@@ -71,6 +71,15 @@ class Mustache_Test_FiveThree_Functional_AttributesTest extends PHPUnit_Framewor
                 ),
                 '<p>bin</p>',
             ),
+            array(
+                '{{# foo bar="ok" }}{{ bar }}{{/ foo }}',
+                array(
+                    'foo' => function($tpl, $helper, $attrs) {
+                        return $helper->renderWith($tpl, $attrs);
+                    }
+                ),
+                'ok'
+            )
         );
     }
 
@@ -153,7 +162,7 @@ class Mustache_Test_FiveThree_Functional_AttributesTest extends PHPUnit_Framewor
                 '{{ foo bar="1" }}',
                 array(),
                 '',
-            ),
+            )
         );
     }
 
@@ -214,7 +223,7 @@ class Mustache_Test_FiveThree_Functional_AttributesTest extends PHPUnit_Framewor
     {
         return array(
             array(
-                '{{% FILTERS}}{{ foo bar="foo" | ucase }}',
+                '{{% FILTERS }}{{ foo bar="foo" | ucase }}',
                 array(
                     'ucase' => function ($value) {
                         return ucfirst($value);

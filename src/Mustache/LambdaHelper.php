@@ -28,8 +28,9 @@ class Mustache_LambdaHelper
      * @param Mustache_Engine  $mustache Mustache engine instance.
      * @param Mustache_Context $context  Rendering context.
      * @param string           $delims   Optional custom delimiters, in the format `{{= <% %> =}}`. (default: null)
+     * @param array|null       $attrs
      */
-    public function __construct(Mustache_Engine $mustache, Mustache_Context $context, $delims = null)
+    public function __construct(Mustache_Engine $mustache, Mustache_Context $context, $delims = null, $attrs = null)
     {
         $this->mustache = $mustache;
         $this->context  = $context;
@@ -48,6 +49,23 @@ class Mustache_LambdaHelper
         return $this->mustache
             ->loadLambda((string) $string, $this->delims)
             ->renderInternal($this->context);
+    }
+
+    /**
+     * Render a string as a Mustache template with the current rendering context
+     * AND an attribute context.
+     *
+     * @param string $string
+     * @param array  $attrs
+     *
+     * @return string Rendered template.
+     */
+    public function renderWith($string, array $attrs = [])
+    {
+        $this->context->pushAttrContext($attrs);
+        $result = $this->render($string);
+        $this->context->popAttrContext();
+        return $result;
     }
 
     /**
@@ -73,4 +91,5 @@ class Mustache_LambdaHelper
     {
         return new self($this->mustache, $this->context, $delims);
     }
+
 }
