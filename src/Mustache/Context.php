@@ -16,7 +16,6 @@ class Mustache_Context
 {
     private $stack      = array();
     private $blockStack = array();
-    private $attrStack  = array();
     private $attrArgs   = null;
 
     /**
@@ -42,16 +41,6 @@ class Mustache_Context
     }
 
     /**
-     * Push a new Attribute Context frame onto the stack.
-     *
-     * @param mixed $value Object or array to use for context
-     */
-    public function pushAttrContext($value)
-    {
-        array_push($this->attrStack, $value);
-    }
-
-    /**
      * Push a new Context frame onto the block context stack.
      *
      * @param mixed $value Object or array to use for block context
@@ -69,16 +58,6 @@ class Mustache_Context
     public function pop()
     {
         return array_pop($this->stack);
-    }
-
-    /**
-     * Pop the last attribute Context frame from the stack.
-     *
-     * @return mixed Last block Context frame (object or array)
-     */
-    public function popAttrContext()
-    {
-        return array_pop($this->attrStack);
     }
 
     /**
@@ -118,14 +97,6 @@ class Mustache_Context
      */
     public function find($id, $attrs=null)
     {
-        if ($id !== '.' && count($this->attrStack)) {
-            // Ensures that we don't override blocks that are looping over an array.
-            $val = $this->findVariableInStack($id, $this->attrStack, $attrs);
-            if ($val) {
-                return $val;
-            }
-        }
-
         return $this->findVariableInStack($id, $this->stack, $attrs);
     }
 
@@ -158,14 +129,7 @@ class Mustache_Context
     {
         $chunks = explode('.', $id);
         $first  = array_shift($chunks);
-        $value  = '';
-
-        if (count($this->attrStack)) {
-            $value = $this->findVariableInStack($first, $this->attrStack, $attrs);
-        }
-        if (!$value) {
-            $value = $this->findVariableInStack($first, $this->stack, $attrs);
-        }
+        $value = $this->findVariableInStack($first, $this->stack, $attrs);
 
         foreach ($chunks as $chunk) {
             if ($value === '') {

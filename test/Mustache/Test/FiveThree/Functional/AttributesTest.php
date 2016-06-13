@@ -32,18 +32,18 @@ class Mustache_Test_FiveThree_Functional_AttributesTest extends PHPUnit_Framewor
             array(
                 '{{# foo bar="bin" }}{{ bar }}{{/ foo }}',
                 array(
-                    'foo' => true,
+                    'foo' => true
                 ),
                 'bin',
             ),
             array(
-                '{{# foo bar="bin" }}{{ bar }}{{ thing }}{{/ foo }}',
+                '{{# foo bar="bin" }}{{ bar }}{{/ foo }}',
                 array(
-                    'foo' => array(
-                        'thing' => 'bif',
-                    ),
+                    'foo' => [
+                        'bar' => 'ok'
+                    ]
                 ),
-                'binbif',
+                'ok',
             ),
             array(
                 '{{# foo bar="bin" }}{{ bar }}{{ . }}{{/ foo }}',
@@ -54,13 +54,6 @@ class Mustache_Test_FiveThree_Functional_AttributesTest extends PHPUnit_Framewor
                     ),
                 ),
                 'binbifbinbax',
-            ),
-            array(
-                '{{# foo bar="bin" }}{{ bar }}{{ . }}{{/ foo }}',
-                array(
-                    'foo' => 'bif',
-                ),
-                'binbif',
             ),
             array(
                 '{{# foo bar="bin" }}{{ bar }}{{/ foo }}',
@@ -77,16 +70,6 @@ class Mustache_Test_FiveThree_Functional_AttributesTest extends PHPUnit_Framewor
                     'foo' => function($tpl, $helper, $attrs) {
                         return $helper->renderWith($tpl, $attrs);
                     }
-                ),
-                'ok'
-            ),
-            array(
-                '{{# foo bar=bin }}{{ bar.ok }}{{/ foo }}',
-                array(
-                    'foo' => true,
-                    'bin' => [
-                        'ok' => 'ok'
-                    ]
                 ),
                 'ok'
             )

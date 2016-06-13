@@ -62,9 +62,9 @@ class Mustache_LambdaHelper
      */
     public function renderWith($string, array $attrs = [])
     {
-        $this->context->pushAttrContext($attrs);
+        $this->context->push($attrs);
         $result = $this->render($string);
-        $this->context->popAttrContext();
+        $this->context->pop();
         return $result;
     }
 

@@ -335,6 +335,15 @@ class Mustache_Compiler
         $buffer .= $this->section%s($context, $indent, $value);
     ';
 
+    const SECTION_ITERATOR = '
+        $values = $this->isIterable($value) ? $value : array($value);
+        foreach ($values as $value) {
+            $context->push($value);
+            %s
+            $context->pop();
+        }
+    ';
+
     const SECTION = '
         private function section%s(Mustache_Context $context, $indent, $value)
         {
@@ -352,12 +361,7 @@ class Mustache_Compiler
                         ->renderInternal($context);
                 }
             } elseif (!empty($value)) {
-                $values = $this->isIterable($value) ? $value : array($value);
-                foreach ($values as $value) {
-                    $context->push($value);
-                    %s
-                    $context->pop();
-                }
+                %s
             }
 
             return $buffer;
@@ -403,9 +407,9 @@ class Mustache_Compiler
         $key = ucfirst(md5($delims . "\n" . $source));
 
         if (!isset($this->sections[$key])) {
-            $body = $this->walk($nodes, 2);
-            if (count($attrs) > 0) {
-                $body = $this->wrapAttrContext($attrs, $body, 3);
+            $body = sprintf($this->prepare(self::SECTION_ITERATOR, $level + 1), $this->walk($nodes, 2));
+            if (count($attrs)) {
+                $body = $this->wrapAttrContext($attrs, $body, $level);
             }
             $this->sections[$key] = sprintf($this->prepare(self::SECTION), $key, $callable, $source, $helper, $delims, $body);
         }
@@ -447,7 +451,7 @@ class Mustache_Compiler
         $filters = $this->getFilters($filters, $level);
 
         $body = $this->walk($nodes, $level);
-        if (count($attrs) > 0) {
+        if (count($attrs)) {
             $body = $this->wrapAttrContext($attrs, $body, $level);
         }
 
@@ -746,9 +750,9 @@ class Mustache_Compiler
     }
 
     const ATTR_SCOPE = '
-        $context->pushAttrContext(array(%s
+        $context->push(array(%s
         ));%s
-        $context->popAttrContext();
+        $context->pop();
     ';
     const ATTR_BINDING = '"%s" => %s,';
 
